@@ -46,18 +46,20 @@ class BoardSpider(scrapy.Spider):
 
             # get title
             title = cols[2].xpath('div/a')
-            title = cols[2].css("a::text").get()
+            title = title.css("a::text").get()
 
             # get topic starter profile link
             author_link = cols[2].css("span::attr(onclick)").get()
             author_link = author_link.split("'")[1]
 
             # get topic starter name
-            author_name = cols[2].css("span::text").get()
+            author_name = cols[2].css("span::text").getall()[-1]
 
             # get when last message was made
             last_message_date = cols[3].xpath('div')
             last_message_date = last_message_date[0].css("::text").get()
+            # remove control chars
+            last_message_date = ''.join(last_message_date.split())
 
             # write down to the clipboard
             threads_data.append([pinned, author_name, author_link, title, url, last_message_date])
