@@ -1,4 +1,5 @@
 import scrapy
+import json
 
 class BoardSpider(scrapy.Spider):
     """ Parse threads of th board
@@ -26,7 +27,7 @@ class BoardSpider(scrapy.Spider):
         rows = threads.xpath('tr')
 
         # define clipboard
-        threads_data = ""
+        threads_data = []
 
         # get data from all threads
         for row in rows:
@@ -59,8 +60,9 @@ class BoardSpider(scrapy.Spider):
             last_message_date = last_message_date[0].css("::text").get()
 
             # write down to the clipboard
-            threads_data = threads_data + '; '.join([str(pinned), author_name, author_link, title, url, last_message_date, "\n"])
+            threads_data.append([pinned, author_name, author_link, title, url, last_message_date])
 
         # write down to the file
+        data_to_write = json.dumps(threads_data)
         with open('threads.csv', 'w') as f:
-            f.write(threads_data)
+            f.write(data_to_write)
