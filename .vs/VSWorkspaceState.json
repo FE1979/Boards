@@ -1,0 +1,11 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\crawler",
+    "\\crawler\\board_crawler",
+    "\\crawler\\board_crawler\\board_crawler",
+    "\\crawler\\board_crawler\\board_crawler\\spiders"
+  ],
+  "SelectedNode": "\\crawler\\board_crawler\\board_crawler\\spiders\\crawl_board.py",
+  "PreviewInSolutionExplorer": false
+}
