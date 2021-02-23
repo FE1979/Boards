@@ -68,3 +68,8 @@ class BoardSpider(scrapy.Spider):
         data_to_write = json.dumps(threads_data)
         with open('threads.csv', 'w') as f:
             f.write(data_to_write)
+
+
+        # write to the txt file
+        with open('threads.txt','w') as f:
+            f.writelines(str(threads_data))
