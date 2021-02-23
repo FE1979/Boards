@@ -17,12 +17,12 @@ class BoardSpider(scrapy.Spider):
 
     def parse(self, response):
         """ recursively parse threads to the given deep """
-        
+
         # get pagination and next page url
         tables = response.xpath('//table')
         next_page = tables[11].css('a::attr(href)').get()
 
-        # get all threads 
+        # get all threads
         threads = response.xpath("//tbody[@id='threadbits_forum_216']")
         rows = threads.xpath('tr')
 
@@ -33,7 +33,7 @@ class BoardSpider(scrapy.Spider):
         for row in rows:
             # take columns
             cols = row.xpath('td')
-            
+
             # pinned topic?
             sticky = "Важная тема"
             pinned = False
@@ -41,8 +41,10 @@ class BoardSpider(scrapy.Spider):
             if sticky in alts:
                 pinned = True
 
-            # get url for the topic
-            url = cols[2].css("a::attr(href)").get()
+            # get url of the topic (take thread number from 1st column)
+            thread_id = cols[0].css("td:attr(id)").get()
+            thread_id = thread_id.split("_")[2]
+            url = f"showthread.php?t={thread_id}"
 
             # get title
             title = cols[2].xpath('div/a')
