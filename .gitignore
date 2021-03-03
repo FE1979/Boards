@@ -130,3 +130,6 @@ dmypy.json
 crawler/pp.py
 *.csv
 *.txt
+*.csv
+*.csv
+crawler/threads.txt

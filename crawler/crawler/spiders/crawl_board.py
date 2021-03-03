@@ -1,5 +1,6 @@
 import scrapy
 import json
+from datetime import date, timedelta
 
 class BoardSpider(scrapy.Spider):
     """ Parse threads of th board
@@ -10,9 +11,15 @@ class BoardSpider(scrapy.Spider):
         output: csv file
     """
 
+    #spider variables
     name = "board_spider"
-
     start_urls = ["http://fishing.kiev.ua/vb3/forumdisplay.php?f=216"]
+
+    # Parsing depth variables
+    def __init__(self):
+        self.parsing_depth = timedelta(days=2) #get N days old threads
+        self.today = 'Сегодня'
+        self.yesterday = 'Вчера'
 
 
     def parse(self, response):
@@ -41,6 +48,27 @@ class BoardSpider(scrapy.Spider):
             if sticky in alts:
                 pinned = True
 
+            #get date
+            thread_update_date = cols[3].xpath('div').css('::text').get()
+            thread_update_date = ''.join(thread_update_date.split())
+
+            if thread_update_date == self.today:
+                thread_update_date = date.today()
+            elif thread_update_date == self.yesterday:
+                thread_update_date = date.today() - timedelta(days=1)
+            else:
+                thread_update_date = thread_update_date.split('.')
+                thread_update_date = date(day=int(thread_update_date[0]), \
+                                          month=int(thread_update_date[1]), \
+                                          year=int(thread_update_date[2])
+                                          )
+
+            #stop if thread_update_date exceeds parsing_depth
+            if date.today() - thread_update_date > self.parsing_depth:
+                if not pinned:
+                    break
+
+
             # get url for the topic
             thread_id = cols[0].attrib['id']
             thread_id = thread_id.split("_")[-1]
@@ -57,22 +85,11 @@ class BoardSpider(scrapy.Spider):
             # get topic starter name
             author_name = cols[2].css("span::text").getall()[-1]
 
-            # get when last message was made
-            last_message_date = cols[3].xpath('div')
-            last_message_date = last_message_date[0].css("::text").get()
-            # remove control chars
-            last_message_date = ''.join(last_message_date.split())
-
             # write down to the clipboard
-            threads_data.append([pinned, thread_id, author_name, author_link,
-                                title, url, last_message_date])
+            threads_data.append([pinned, thread_id, author_name, author_link, \
+                                title, thread_update_date.__str__(), url])
 
         # write down to the file
         data_to_write = json.dumps(threads_data)
         with open('threads.csv', 'w') as f:
             f.write(data_to_write)
-
-
-        # write to the txt file
-        with open('threads.txt','w') as f:
-            f.writelines(str(threads_data))
