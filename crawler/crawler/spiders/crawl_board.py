@@ -42,8 +42,8 @@ class BoardSpider(scrapy.Spider):
                 pinned = True
 
             # get url for the topic
-            thread_id = cols[0].css("td:attr(id)").get()
-            thread_id = thread_id.split("_")[2]
+            thread_id = cols[0].attrib['id']
+            thread_id = thread_id.split("_")[-1]
             url = f"showthread.php?t={thread_id}"
 
             # get title
@@ -64,7 +64,8 @@ class BoardSpider(scrapy.Spider):
             last_message_date = ''.join(last_message_date.split())
 
             # write down to the clipboard
-            threads_data.append([pinned, author_name, author_link, title, url, last_message_date])
+            threads_data.append([pinned, thread_id, author_name, author_link,
+                                title, url, last_message_date])
 
         # write down to the file
         data_to_write = json.dumps(threads_data)
