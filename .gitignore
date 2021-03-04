@@ -133,3 +133,4 @@ crawler/pp.py
 *.csv
 *.csv
 crawler/threads.txt
+*.json

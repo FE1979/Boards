@@ -3,7 +3,7 @@ import json
 from datetime import date, timedelta
 
 class BoardSpider(scrapy.Spider):
-    """ Parse threads of th board
+    """ Parse threads of the board
         input: start urls
         input type: str
         input: parsing deep
@@ -13,13 +13,19 @@ class BoardSpider(scrapy.Spider):
 
     #spider variables
     name = "board_spider"
-    start_urls = ["http://fishing.kiev.ua/vb3/forumdisplay.php?f=216"]
 
-    # Parsing depth variables
+
+    # Parsing variables
     def __init__(self):
-        self.parsing_depth = timedelta(days=2) #get N days old threads
+        self.parsing_depth = timedelta(days=0) # int(getattr(self, ' depth', None))
         self.today = 'Сегодня'
         self.yesterday = 'Вчера'
+        self.forum = "http://fishing.kiev.ua/vb3/"
+        self.board = "forumdisplay.php?f=216"
+
+
+    def start_requests(self):
+        yield scrapy.Request(self.forum + self.board, self.parse)
 
 
     def parse(self, response):
@@ -28,13 +34,11 @@ class BoardSpider(scrapy.Spider):
         # get pagination and next page url
         tables = response.xpath('//table')
         next_page = tables[11].css('a::attr(href)').get()
+        next_page = self.forum + next_page
 
         # get all threads
         threads = response.xpath("//tbody[@id='threadbits_forum_216']")
         rows = threads.xpath('tr')
-
-        # define clipboard
-        threads_data = []
 
         # get data from all threads
         for row in rows:
@@ -68,7 +72,6 @@ class BoardSpider(scrapy.Spider):
                 if not pinned:
                     break
 
-
             # get url for the topic
             thread_id = cols[0].attrib['id']
             thread_id = thread_id.split("_")[-1]
@@ -85,11 +88,17 @@ class BoardSpider(scrapy.Spider):
             # get topic starter name
             author_name = cols[2].css("span::text").getall()[-1]
 
-            # write down to the clipboard
-            threads_data.append([pinned, thread_id, author_name, author_link, \
-                                title, thread_update_date.__str__(), url])
+            # yield scrapped data
+            yield {
+                'Pinned': pinned,
+                'Thread_id': thread_id,
+                'Author_name': author_name,
+                'Author_link': author_link,
+                'Title': title,
+                'Update_date': thread_update_date.__str__(),
+                'Url': url
+                }
 
-        # write down to the file
-        data_to_write = json.dumps(threads_data)
-        with open('threads.csv', 'w') as f:
-            f.write(data_to_write)
+        # go to next page if not the end
+        if date.today() - thread_update_date < self.parsing_depth:
+            yield response.follow(next_page, callback=self.parse)
