@@ -1,5 +1,4 @@
 import scrapy
-import json
 from datetime import date, timedelta
 
 class BoardSpider(scrapy.Spider):
@@ -7,8 +6,12 @@ class BoardSpider(scrapy.Spider):
         input: start urls
         input type: str
         input: parsing deep
-        input: date in str format
-        output: csv file
+        input type: int
+        input: forum url
+        input type: str
+        input: board url (part of url, concat with forum url)
+        input type: str
+        constants: today and yesterday to get proper date
     """
 
     #spider variables
