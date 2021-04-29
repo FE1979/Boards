@@ -20,7 +20,7 @@ class BoardSpider(scrapy.Spider):
 
     # Parsing variables
     def __init__(self):
-        self.parsing_depth = timedelta(days=0) # int(getattr(self, ' depth', None))
+        self.parsing_depth = timedelta(days=3) # int(getattr(self, ' depth', None))
         self.today = 'Сегодня'
         self.yesterday = 'Вчера'
         self.forum = "http://fishing.kiev.ua/vb3/"
