@@ -3,8 +3,8 @@ import w3lib.html as w3
 import json
 
 
-class BoardSpider(scrapy.Spider):
-    """ Parse topic to get info about item for sell
+class TopicSpider(scrapy.Spider):
+    """ Parse each topic to get info about item for sell
         input: start urls
         input type: str
         input: forum url
@@ -26,7 +26,7 @@ class BoardSpider(scrapy.Spider):
             threads = f.read()
 
         threads = json.loads(threads)
-        urls = [item['url'] for item in threads]
+        urls = [self.forum + item['Url'] for item in threads]
 
         for url in urls:
             yield scrapy.Request(url=url, callback=self.parse)
@@ -50,8 +50,7 @@ class BoardSpider(scrapy.Spider):
                     posts_list.append(item)
 
         # clear html tags and controls from post messages
-        posts_list = [w3.remove_tags[x.get()] for x in posts_list]
-        posts_list = [''.join(x.split()) for x in posts_list]
+        posts_list = [w3.remove_tags(x.get()) for x in posts_list]
 
         # Save post collection
         posts = {f'post_{i}': posts_list[i] for i in range(len(posts_list))}
