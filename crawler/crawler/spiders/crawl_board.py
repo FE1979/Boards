@@ -1,4 +1,5 @@
 import scrapy
+from ..items import ThreadItem
 from datetime import date, timedelta
 
 class BoardSpider(scrapy.Spider):
@@ -92,15 +93,18 @@ class BoardSpider(scrapy.Spider):
             author_name = cols[2].css("span::text").getall()[-1]
 
             # yield scrapped data
-            yield {
-                'Pinned': pinned,
-                'Thread_id': thread_id,
-                'Author_name': author_name,
-                'Author_link': author_link,
-                'Title': title,
-                'Update_date': thread_update_date.__str__(),
-                'Url': url
-                }
+            thread = ThreadItem()
+            thread = {
+            'Pinned': pinned,
+            'Thread_id': thread_id,
+            'Author_name': author_name,
+            'Author_link': author_link,
+            'Title': title,
+            'Update_date': thread_update_date.__str__(),
+            'Url': url
+            }
+
+            yield thread
 
         # go to next page if not the end
         if date.today() - thread_update_date < self.parsing_depth:
